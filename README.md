@@ -11,7 +11,7 @@ WARNING: This is a tool for advanced users who know their way around Linux. It i
 * You like the idea of writing a few config files and then not having to worry about the details.
 * You like reproducability.
 
-# Installation
+# Installation + Usage
 
 * Install [simp_le](https://github.com/kuba/simp_le)
 * Copy `src/certgen` to `/usr/bin/`
