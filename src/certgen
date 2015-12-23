@@ -80,7 +80,7 @@ read_config() {
 generate_cert() {
     config_file=$1
     config_name="$(basename $config_file)"
-    echo ""
+    echo
     log_info "Creating certificate for $config_name"
 
     unset -f on_complete
