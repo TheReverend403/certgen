@@ -162,7 +162,7 @@ if [[ -d "$certgen_config_dir" ]]; then
     source "$CERTGEN_CONFIG"
 else
     mkdir -p "$certgen_config_dir"
-    log_error "Please copy the default config to $CERTGEN_CONFIG"
+    log_err "Please copy the default config to $CERTGEN_CONFIG"
 fi
 
 source "$CERTGEN_CONFIG"
