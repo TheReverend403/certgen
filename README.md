@@ -22,4 +22,4 @@ WARNING: This is a tool for advanced users who know their way around Linux. It i
 
 Optionally, you can also run `certgen` as a cronjob. simp_le will not renew your certs or even contact Let's Encrypt servers unless your certificate is at least 30 days (by default) from expiry, so it's safe to run it as often as you want.
 
-Note: Running `certgen` with no arguments simply loops over all of your site configs and generates certs for them (if needed). If you only want to process certain configs, you can pass the full path to them as parameters to `certgen` like so: `certgen /etc/certgen/conf.d/example.com /etc/certgen/conf.d/example.org`
+Running `certgen` with no arguments simply loops over all of your site configs and generates certs for them (if needed). If you only want to process certain configs, you can pass the full path to them as parameters to `certgen` like so: `certgen /etc/certgen/conf.d/example.com /etc/certgen/conf.d/example.org`
