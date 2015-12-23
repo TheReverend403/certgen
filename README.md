@@ -7,7 +7,7 @@ WARNING: This is a tool for advanced users who know their way around Linux. It i
 # This tool is for you if...
 
 * You like the simplicity and reasoning behind [simp_le](https://github.com/kuba/simp_le) but you want a slightly higher, but still low-level abstraction.
-* You have a lot of domains/subdomains that would simply be cumbersome to get set up with [simp_le](https://github.com/kuba/simp_le) initially without writing your own script.
+* You have a lot of domains/subdomains that would simply be too cumbersome to get set up with [simp_le](https://github.com/kuba/simp_le) initially without writing your own script.
 * You like the idea of writing a few config files and then not having to worry about the details.
 * You like reproducability.
 
