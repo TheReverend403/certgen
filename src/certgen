@@ -22,12 +22,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-if [[ -z $CERTGEN_CONFIG ]]; then
-    CERTGEN_CONFIG="/etc/certgen/config"
-fi
-
-source "$CERTGEN_CONFIG"
-
 txtgrn='\e[0;32m'
 txtred='\e[0;31m'
 txtylw='\e[0;33m'
@@ -158,6 +152,20 @@ createdirs() {
         log_info "Created webroot directory at $webroot"
     fi
 }
+
+if [[ -z $CERTGEN_CONFIG ]]; then
+    CERTGEN_CONFIG="/etc/certgen/config"
+fi
+
+certgen_config_dir=$(basename "$CERTGEN_CONFIG")
+if [[ -d "$certgen_config_dir" ]]; then
+    source "$CERTGEN_CONFIG"
+else
+    mkdir -p "$certgen_config_dir"
+    log_error "Please copy the default config to $CERTGEN_CONFIG"
+fi
+
+source "$CERTGEN_CONFIG"
 
 . "$simp_le_dir/venv/bin/activate"
 createdirs
