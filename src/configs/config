@@ -1,0 +1,6 @@
+simp_le_dir="/opt/simp_le"
+certdir="/etc/ssl/letsencrypt/certs"
+logdir="/var/log/certgen"
+logfile="$logdir/certgen.log"
+confdir="/etc/certgen/conf.d"
+webroot="/etc/ssl/letsencrypt/webroot"

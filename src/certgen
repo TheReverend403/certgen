@@ -1,0 +1,182 @@
+#!/bin/sh
+
+# The MIT License (MIT)
+#
+# Copyright (c) 2015 Lee Watson <rev@revthefox.co.uk>
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+if [[ -z $CERTGEN_CONFIG ]]; then
+    CERTGEN_CONFIG="/etc/certgen/config"
+fi
+
+source "$CERTGEN_CONFIG"
+
+txtgrn='\e[0;32m'
+txtred='\e[0;31m'
+txtylw='\e[0;33m'
+txtrst='\e[0m'
+
+exit_success=0
+exit_no_renewal=1
+exit_error=2
+
+log_info() {
+    date_now="$(date +'%Y-%m-%d %H:%M:%S')"
+    echo -e "[${txtgrn}INFO${txtrst}] $1"
+    echo "$date_now [INFO] $1" >> "$logfile"
+}
+
+log_warn() {
+    date_now="$(date +'%Y-%m-%d %H:%M:%S')"
+    echo -e "[${txtylw}WARNING${txtrst}] $1"
+    echo "$date_now [WARNING] $1" >> "$logfile"
+}
+
+log_err() {
+    date_now="$(date +'%Y-%m-%d %H:%M:%S')"
+    echo -e "[${txtred}ERROR${txtrst}] $1"
+    echo "$date_now [ERROR] $1" >> "$logfile"
+}
+
+read_config() {
+    cert_config=$1
+
+    # Set defaults
+    domain=""
+    extra_domains=""
+    email=""
+    server="https://acme-v01.api.letsencrypt.org/directory"
+    group="root"
+    cert_size=2048
+
+    source "$cert_config"
+
+    if [[ -z "$domain" ]]; then
+        log_err "Missing required parameter 'domain' in $cert_config"
+        return 1
+    fi
+
+    if [[ -z "$email" ]]; then
+        log_err "Missing required parameter 'email' in $cert_config"
+        return 1
+    fi
+
+    if [[ $cert_size > 2048 ]]; then
+        log_warn "A certificate size larger than 2048 bits may have a negative impact on TLS handshake performance, leading to longer load times and higher CPU usage for not much extra security."
+    fi
+}
+
+generate_cert() {
+    config_file=$1
+    config_name="$(basename $config_file)"
+    echo ""
+    log_info "Creating certificate for $config_name"
+
+    unset -f on_complete
+    read_config "$config_file"
+
+    if [[ $? == 1 ]]; then
+        return 1
+    fi
+
+    cd "$certdir"
+
+    if [[ ! -d "$domain" ]]; then
+        mkdir "$domain"
+        chmod 750 "$domain"
+        if [[ -n $group ]]; then
+            log_info "Setting group on $certdir/$domain to $group and permissions to 750"
+            chgrp "$group" "$domain"
+        fi
+    fi
+
+    cd "$domain"
+
+    domain_list="-d ${domain}"
+    if [[ -n "$extra_domains" ]]; then
+        for extra_domain in ${extra_domains[@]}; do
+            domain_list="${domain_list} -d ${extra_domain}"
+        done
+    fi
+
+    le_command="simp_le --cert_key_size ${cert_size} --email ${email} --server ${server} --default_root ${webroot} -f account_key.json -f key.pem -f cert.pem -f chain.pem -f fullchain.pem ${domain_list}"
+    log_info "Running simp_le from $PWD as: $le_command"
+
+    $le_command >> "$logfile" 2>&1
+
+    retval=$?
+    if [[ $retval == $exit_success ]]; then
+        log_info "Running on_complete() for $config_name"
+        on_complete
+    elif [[ $retval == $exit_no_renewal ]]; then
+        log_info "Cert does not need renewal, skipping."
+    elif [[ $retval == $exit_error ]]; then
+        log_err "Error occured in simp_le, check $logdir/certgen.log for details"
+        tail -n 6 "$logfile" | grep -i ':ERROR:'
+    fi
+    find "${webroot}/.well-known/acme-challenge" -type f -delete
+    sleep 0.5
+}
+
+createdirs() {
+    if [[ ! -d "$confdir" ]]; then
+        mkdir -p "$confdir"
+        chmod 750 "$confdir"
+        log_info "Created config directory at $confdir"
+    fi
+
+    if [[ ! -d "$logdir" ]]; then
+        mkdir -p "$logdir"
+        chmod 750 "$logdir"
+        log_info "Created log directory at $logdir"
+    fi
+
+    if [[ ! -d "$certdir" ]]; then
+        mkdir -p "$certdir"
+        log_info "Created cert directory at $certdir"
+    fi
+
+    if [[ ! -d "$webroot" ]]; then
+        mkdir -p "$webroot"
+        log_info "Created webroot directory at $webroot"
+    fi
+}
+
+. "$simp_le_dir/venv/bin/activate"
+createdirs
+
+if [[ -n $1 ]]; then
+    if [[ "$1" == "-h" || "$1" == "--help" ]]; then
+        echo "Usage: $(basename $0) [/path/to/config ...]"
+        exit 0
+    fi
+    certs=$@
+else
+    certs=$(find "$confdir" -maxdepth 2 -type f)
+fi
+
+if [[ ${#certs[@]} == 0} ]]; then
+    log_err "No config files found in $confdir or in your command line args. If this isn't your first time running certgen, please refer to the README.md distributed with the script."
+    exit 1
+fi
+
+for cert_config in ${certs[@]}; do
+    generate_cert "$cert_config"
+done
