@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # The MIT License (MIT)
 #
@@ -157,7 +157,7 @@ if [[ -z $CERTGEN_CONFIG ]]; then
     CERTGEN_CONFIG="/etc/certgen/config"
 fi
 
-certgen_config_dir=$(basename "$CERTGEN_CONFIG")
+certgen_config_dir=$(dirname "$CERTGEN_CONFIG")
 if [[ -d "$certgen_config_dir" ]]; then
     source "$CERTGEN_CONFIG"
 else
