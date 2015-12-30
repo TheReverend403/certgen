@@ -56,6 +56,7 @@ read_config() {
     domain=""
     extra_domains=""
     email=""
+    webroot="$default_webroot"
     server="https://acme-v01.api.letsencrypt.org/directory"
     group="root"
     cert_size=2048
@@ -147,10 +148,14 @@ createdirs() {
         log_info "Created cert directory at $certdir"
     fi
 
-    if [[ ! -d "$webroot" ]]; then
-        mkdir -p "$webroot"
-        log_info "Created webroot directory at $webroot"
+    if [[ ! -d "$default_webroot" ]]; then
+        mkdir -p "$default_webroot"
+        log_info "Created webroot directory at $default_webroot"
     fi
+}
+
+update_config() {
+    grep -q 'default_webroot' "$CERTGEN_CONFIG" || sed -i 's/^webroot/default_webroot/g' "$CERTGEN_CONFIG"
 }
 
 if [[ -z $CERTGEN_CONFIG ]]; then
@@ -169,6 +174,7 @@ source "$CERTGEN_CONFIG"
 
 . "$simp_le_dir/venv/bin/activate"
 createdirs
+update_config
 
 if [[ -n $1 ]]; then
     if [[ "$1" == "-h" || "$1" == "--help" ]]; then
