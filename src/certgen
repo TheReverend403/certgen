@@ -173,8 +173,8 @@ fi
 source "$CERTGEN_CONFIG"
 
 . "$simp_le_dir/venv/bin/activate"
-createdirs
 update_config
+createdirs
 
 if [[ -n $1 ]]; then
     if [[ "$1" == "-h" || "$1" == "--help" ]]; then
