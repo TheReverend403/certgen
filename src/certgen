@@ -186,7 +186,7 @@ else
     certs=$(find "$confdir" -maxdepth 2 -type f)
 fi
 
-if [[ ${#certs[@]} == 0} ]]; then
+if [[ ${#certs[@]} == 0 ]]; then
     log_err "No config files found in $confdir or in your command line args. If this isn't your first time running certgen, please refer to the README.md distributed with the script."
     exit 1
 fi
