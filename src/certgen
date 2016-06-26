@@ -121,7 +121,7 @@ generate_cert() {
         log_info "Running on_complete() for $config_name"
         set -x
         on_complete
-        set +x
+        { set +x; } 2>/dev/null
     elif [[ $retval == $exit_no_renewal ]]; then
         log_info "Cert does not need renewal, skipping."
     elif [[ $retval == $exit_error ]]; then

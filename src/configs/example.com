@@ -18,7 +18,7 @@ webroot="/path/to/webroot"
 # OPTIONAL, defaults to https://acme-v01.api.letsencrypt.org/directory
 server="https://acme-v01.api.letsencrypt.org/directory"
 
-# Certificate size in bits. Can only be 2048 or 4096. 
+# Certificate size in bits. Can only be 2048 or 4096.
 # OPTIONAL, defaults to 2048.
 cert_size=2048
 
