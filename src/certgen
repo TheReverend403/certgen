@@ -59,7 +59,7 @@ read_config() {
     webroot="$default_webroot"
     server="https://acme-v01.api.letsencrypt.org/directory"
     group="root"
-    cert_size=2048
+    cert_size=4096
 
     source "$cert_config"
 
@@ -71,10 +71,6 @@ read_config() {
     if [[ -z "$email" ]]; then
         log_err "Missing required parameter 'email' in $cert_config"
         return 1
-    fi
-
-    if [[ $cert_size > 2048 ]]; then
-        log_warn "A certificate size larger than 2048 bits may have a negative impact on TLS handshake performance, leading to longer load times and higher CPU usage for not much extra security."
     fi
 }
 
