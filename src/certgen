@@ -27,6 +27,9 @@ txtred='\e[0;31m'
 txtylw='\e[0;33m'
 txtrst='\e[0m'
 
+tos_hash='cc88d8d9517f490191401e7b54e9ffd12a2b9082ec7a1d4cec6101f9f1647e7b'
+tos_hash_old='6373439b9f29d67a5cd4d18cbc7f264809342dbf21cb2ba2fc7588df987a6221'
+
 exit_success=0
 exit_no_renewal=1
 exit_error=2
